@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Whatsapp link</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    button { background-color: #007bff; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; }
+    h2 { margin-top: 20px; display: inline-block; }
+
+    #phoneInput { border: 1px solid grey; border-radius: 5px; padding: 10px; font-size: 18px; }
+    #phoneInput.invalid { border: 1px solid red; }
+    #phoneInput.valid { border: 1px solid green; }
+    #phoneInput:focus {
+      outline: none;
+      border: 1px solid grey;
+    }
+
+    #phoneInput.invalid:focus {
+      outline: none;
+      border: 1px solid red;
+    }
+
+    #phoneInput.valid:focus {
+      border: 1px solid green;
+    }
+
+    #whatsappLink {
+  position: relative;
+  display: inline-block;
+}
+    #phoneList {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+#phoneList li a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+#phoneList li button {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+}
+  </style>
+</head>
+<body>
+  <h2>Whatsapp link</h2>
+  <br/>
+  <input type="text" id="phoneInput" placeholder="Enter phone number">
+  <div id="whatsappLink"></div>
+
+  <ul id="phoneList"></ul>
+  <button id="clearList">Clear</button>
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.16/libphonenumber-js.min.js"></script>
+   <script>
+      let countryCode = 'US'; // Default to US
+
+
+    fetch('https://ipapi.co/country/')
+    .then(response => response.text())
+    .then(data => {
+      countryCode = data;
+    })
+    .catch(error => {
+      console.error('Error fetching country code:', error);
+    });
+
+    let phoneList = JSON.parse(localStorage.getItem("phoneList") || "[]");
+
+    function updateList() {
+      const ul = document.getElementById("phoneList");
+      ul.innerHTML = "";
+      for (const url of phoneList) {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+        const delBtn = document.createElement("button");
+        delBtn.innerText = "Delete";
+        delBtn.addEventListener("click", function() {
+          phoneList = phoneList.filter(p => p !== url);
+          localStorage.setItem("phoneList", JSON.stringify(phoneList));
+          updateList();
+        });
+        li.appendChild(delBtn);
+        ul.appendChild(li);
+      }
+    }
+
+    function followAndStoreLink(url) {
+      if (!phoneList.includes(url)) {
+        phoneList.push(url);
+        localStorage.setItem("phoneList", JSON.stringify(phoneList));
+        updateList();
+      }
+      //window.open(url, '_blank');
+    }
+
+    const inputElem = document.getElementById("phoneInput");
+    inputElem.addEventListener("input", function(e) {
+      const phone = e.target.value;
+      const parsed = libphonenumber.parsePhoneNumberFromString(phone, countryCode);
+      if (parsed && parsed.isValid()) {
+        inputElem.classList.remove("invalid");
+        inputElem.classList.add("valid");
+        const whatsappURL = `whatsapp://send?phone=${parsed.number}`;
+        const linkElem = document.createElement("a");
+        linkElem.style.backgroundColor = 'green';
+        linkElem.style.color = 'white';
+        linkElem.style.padding = '10px';
+        linkElem.style.borderRadius = '5px';
+        linkElem.href = whatsappURL;
+        linkElem.innerText = "Go";
+        linkElem.addEventListener("click", function(event) {
+          event.preventDefault();
+          followAndStoreLink(whatsappURL);
+          window.location.href = whatsappURL;
+        });
+        document.getElementById("whatsappLink").innerHTML = "";
+        document.getElementById("whatsappLink").appendChild(linkElem);
+      } else {
+        inputElem.classList.remove("valid");
+        inputElem.classList.add("invalid");
+        document.getElementById("whatsappLink").innerHTML = "";
+      }
+    });
+
+    inputElem.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        const linkElem = document.querySelector("#whatsappLink a");
+        if (linkElem) {
+          followAndStoreLink(linkElem.href);
+        }
+      }
+    });
+    updateList();
+
+      document.getElementById("clearList").addEventListener("click", function() {
+        localStorage.removeItem("phoneList");
+        phoneList = [];
+        updateList();
+      });
+  </script>
+
+</body>
+</html>
