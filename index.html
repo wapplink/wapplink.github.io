@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>Whatsapp link</title>
   <style>
@@ -25,39 +25,47 @@
     }
 
     #whatsappLink {
-  position: relative;
-  display: inline-block;
-}
+      font-size: 18px;
+      position: relative;
+      display: inline-block;
+    }
+
     #phoneList {
-  list-style-type: none;
-  padding-left: 0;
-}
+      list-style-type: none;
+      padding-left: 0;
+    }
 
-#phoneList li a {
-  color: #007bff;
-  text-decoration: none;
-}
+    #phoneList li a {
+      color: #007bff;
+      text-decoration: none;
+    }
 
-#phoneList li button {
-  background: none;
-  border: none;
-  color: red;
-  cursor: pointer;
-}
+    #phoneList li button {
+      background: none;
+      border: none;
+      color: red;
+      cursor: pointer;
+    }
+
+    #clearBtnList.visible { display: block; }
+    #clearBtnList.hidden { display: none;}
+
   </style>
 </head>
 <body>
   <h2>Whatsapp link</h2>
   <br/>
-  <input type="text" id="phoneInput" placeholder="Enter phone number">
+  <input id="phoneInput" type="tel" class="input-box" required >
   <div id="whatsappLink"></div>
 
-  <ul id="phoneList"></ul>
-  <button id="clearList">Clear</button>
+  <ul id="phoneList" ></ul>
+  <button id="clearBtnList" class="hidden">Clear</button>
 
    <script src="https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.16/libphonenumber-js.min.js"></script>
    <script>
-      let countryCode = 'US'; // Default to US
+    const clearBtn = document.getElementById("clearBtnList");
+
+    let countryCode = 'US'; // Default to US
 
 
     fetch('https://ipapi.co/country/')
@@ -87,6 +95,12 @@
         li.appendChild(delBtn);
         ul.appendChild(li);
       }
+
+      if (phoneList.length > 0) {
+         clearBtn.classList.remove("hidden");
+      } else {
+         clearBtn.classList.add("hidden");
+      }
     }
 
     function followAndStoreLink(url) {
@@ -95,7 +109,7 @@
         localStorage.setItem("phoneList", JSON.stringify(phoneList));
         updateList();
       }
-      //window.open(url, '_blank');
+      window.open(url);
     }
 
     const inputElem = document.getElementById("phoneInput");
@@ -135,14 +149,14 @@
         }
       }
     });
+
+    clearBtn.addEventListener("click", function() {
+      phoneList = [];
+      localStorage.setItem("phoneList", JSON.stringify(phoneList));
+      updateList();
+    });
+
     updateList();
-
-      document.getElementById("clearList").addEventListener("click", function() {
-        localStorage.removeItem("phoneList");
-        phoneList = [];
-        updateList();
-      });
   </script>
-
 </body>
 </html>
