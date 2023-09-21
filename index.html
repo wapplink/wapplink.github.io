@@ -4,13 +4,22 @@
   <title>Whatsapp link</title>
   <script src="https://cdn.usefathom.com/script.js" data-site="KMHDNYSC" defer></script>
   <style>
-    body { font-family: Arial, sans-serif; }
-    button { background-color: #007bff; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; }
+    body { font-family: Arial, sans-serif; text-align: center; font-size: x-large}
+    button { background-color: red; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; }
     h2 { margin-top: 20px; display: inline-block; }
-
+    a {
+      text-decoration: none;
+      vertical-align: middle;
+    }
+    #goLink {
+      background-color: green;
+      padding: 10px;
+      color: white;
+      border-radius: 5px;
+    }
     #phoneInput { border: 1px solid grey; border-radius: 5px; padding: 10px; font-size: 18px; }
-    #phoneInput.invalid { border: 1px solid red; }
-    #phoneInput.valid { border: 1px solid green; }
+    #phoneInput.invalid { border: 3px solid red; }
+    #phoneInput.valid { border: 3px solid green; }
     #phoneInput:focus {
       outline: none;
       border: 1px solid grey;
@@ -18,17 +27,11 @@
 
     #phoneInput.invalid:focus {
       outline: none;
-      border: 1px solid red;
+      border: 3px solid red;
     }
 
     #phoneInput.valid:focus {
-      border: 1px solid green;
-    }
-
-    #whatsappLink {
-      font-size: 18px;
-      position: relative;
-      display: inline-block;
+      border: 3px solid green;
     }
 
     #phoneList {
@@ -38,29 +41,25 @@
 
     #phoneList li a {
       color: #007bff;
-      text-decoration: none;
     }
 
     #phoneList li button {
-      background: none;
-      border: none;
-      color: red;
-      cursor: pointer;
+      background-color: red; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; margin-left: 10px;
     }
 
-    #clearBtnList.visible { display: block; }
-    #clearBtnList.hidden { display: none;}
+    .visible { visibility: visible; }
+    .hidden { visibility: hidden;}
 
   </style>
 </head>
 <body>
-  <h2>Whatsapp link</h2>
+  <h2>Whatsapp link generator</h2>
   <br/>
   <input id="phoneInput" type="tel" class="input-box" required >
-  <div id="whatsappLink"></div>
+  <a id="goLink" href="#" class="hidden" >Open</a>
 
   <ul id="phoneList" ></ul>
-  <button id="clearBtnList" class="hidden">Clear</button>
+  <button id="clearBtnList" class="hidden">Delete all</button>
 
    <script src="https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.16/libphonenumber-js.min.js"></script>
    <script>
@@ -78,18 +77,22 @@
       console.error('Error fetching country code:', error);
     });
 
+    function build_url(phone) {
+      return `whatsapp://send?phone=${phone}`
+    }
+
     let phoneList = JSON.parse(localStorage.getItem("phoneList") || "[]");
 
     function updateList() {
       const ul = document.getElementById("phoneList");
       ul.innerHTML = "";
-      for (const url of phoneList) {
+      for (const phone of phoneList) {
         const li = document.createElement("li");
-        li.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+        li.innerHTML = `<a href="${build_url(phone)}" target="_blank">${phone}</a>`;
         const delBtn = document.createElement("button");
         delBtn.innerText = "Delete";
         delBtn.addEventListener("click", function() {
-          phoneList = phoneList.filter(p => p !== url);
+          phoneList = phoneList.filter(p => p !== phone);
           localStorage.setItem("phoneList", JSON.stringify(phoneList));
           updateList();
         });
@@ -104,14 +107,22 @@
       }
     }
 
-    function followAndStoreLink(url) {
-      if (!phoneList.includes(url)) {
-        phoneList.push(url);
+    function followAndStoreLink(phone) {
+      if (!phoneList.includes(phone)) {
+        phoneList.push(phone);
         localStorage.setItem("phoneList", JSON.stringify(phoneList));
         updateList();
       }
-      window.open(url);
+      window.open(build_url(phone));
     }
+
+    const linkElem = document.getElementById("goLink");
+    linkElem.addEventListener("click", function(e) {
+          e.preventDefault();
+          followAndStoreLink(phone);
+          window.location.href = whatsappURL;
+    });
+
 
     const inputElem = document.getElementById("phoneInput");
     inputElem.addEventListener("input", function(e) {
@@ -120,33 +131,24 @@
       if (parsed && parsed.isValid()) {
         inputElem.classList.remove("invalid");
         inputElem.classList.add("valid");
-        const whatsappURL = `whatsapp://send?phone=${parsed.number}`;
-        const linkElem = document.createElement("a");
-        linkElem.style.backgroundColor = 'green';
-        linkElem.style.color = 'white';
-        linkElem.style.padding = '10px';
-        linkElem.style.borderRadius = '5px';
+        const phone = parsed.number;
+        const whatsappURL = build_url(phone);
         linkElem.href = whatsappURL;
-        linkElem.innerText = "Go";
-        linkElem.addEventListener("click", function(event) {
-          event.preventDefault();
-          followAndStoreLink(whatsappURL);
-          window.location.href = whatsappURL;
-        });
-        document.getElementById("whatsappLink").innerHTML = "";
-        document.getElementById("whatsappLink").appendChild(linkElem);
+        linkElem.setAttribute('data-phone', phone)
+        linkElem.classList.remove("hidden");
       } else {
         inputElem.classList.remove("valid");
         inputElem.classList.add("invalid");
-        document.getElementById("whatsappLink").innerHTML = "";
+        linkElem.classList.add("hidden");
+        linkElem.setAttribute('data-phone', null)
       }
     });
 
     inputElem.addEventListener("keydown", function(e) {
       if (e.key === "Enter") {
-        const linkElem = document.querySelector("#whatsappLink a");
-        if (linkElem) {
-          followAndStoreLink(linkElem.href);
+        phone = linkElem.getAttribute("data-phone")
+        if (phone) {
+          followAndStoreLink(phone);
         }
       }
     });
