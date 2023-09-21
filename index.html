@@ -84,24 +84,35 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.16/libphonenumber-js.min.js"></script>
 <script>
 const clearBtn = document.getElementById("clearBtnList");
+let phoneList = JSON.parse(localStorage.getItem("phoneList") || "[]");
 
-let countryCode = 'US'; // Default to US
+let countryCode = undefined
+let firstPhone = phoneList[0];
+if (firstPhone) {
+  try {
+    let phoneNumber = libphonenumber.parsePhoneNumberFromString(firstPhone);
+    countryCode = phoneNumber.country;
+  } catch (error) {
+    console.log("Invalid number", error);
+  }
+}
 
-
-fetch('https://ipapi.co/country/')
-.then(response => response.text())
-.then(data => {
-  countryCode = data;
-})
-.catch(error => {
-  console.error('Error fetching country code:', error);
-});
-
+if (countryCode == undefined) {
+  fetch('https://ipapi.co/country/')
+          .then(response => response.text())
+          .then(data => {
+            countryCode = data;
+          })
+          .catch(error => {
+            console.error('Error fetching country code:', error);
+          });
+}
+if (countryCode == undefined) {
+  countryCode = "US"
+}
 function build_url(phone) {
   return `whatsapp://send?phone=${phone}`
 }
-
-let phoneList = JSON.parse(localStorage.getItem("phoneList") || "[]");
 
 function updateList() {
   const ul = document.getElementById("phoneList");
@@ -132,7 +143,7 @@ function updateList() {
 
 function followAndStoreLink(phone) {
   if (!phoneList.includes(phone)) {
-    phoneList.push(phone);
+    phoneList.unshift(phone);
     localStorage.setItem("phoneList", JSON.stringify(phoneList));
     updateList();
   }
