@@ -1,10 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Whatsapp link</title>
   <script src="https://cdn.usefathom.com/script.js" data-site="KMHDNYSC" defer></script>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; font-size: x-large}
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      font-family: Arial, sans-serif; text-align: center; font-size: x-large
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
     button { background-color: red; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; }
     h2 { margin-top: 20px; display: inline-block; }
     a {
@@ -53,113 +68,114 @@
   </style>
 </head>
 <body>
-  <h2>Whatsapp link generator</h2>
-  <br/>
-  <input id="phoneInput" type="tel" class="input-box" required >
-  <a id="goLink" href="#" class="hidden" >Open</a>
+  <div class="container">
+    <h2>Whatsapp link generator</h2>
+    <br/>
+    <input id="phoneInput" type="tel" class="input-box" required >
+    <a id="goLink" href="#" class="hidden" >Open</a>
 
-  <ul id="phoneList" ></ul>
-  <button id="clearBtnList" class="hidden">Delete all</button>
+    <ul id="phoneList" ></ul>
+    <button id="clearBtnList" class="hidden">Delete all</button>
+  </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.16/libphonenumber-js.min.js"></script>
+<script>
+const clearBtn = document.getElementById("clearBtnList");
 
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.16/libphonenumber-js.min.js"></script>
-   <script>
-    const clearBtn = document.getElementById("clearBtnList");
-
-    let countryCode = 'US'; // Default to US
-
-
-    fetch('https://ipapi.co/country/')
-    .then(response => response.text())
-    .then(data => {
-      countryCode = data;
-    })
-    .catch(error => {
-      console.error('Error fetching country code:', error);
-    });
-
-    function build_url(phone) {
-      return `whatsapp://send?phone=${phone}`
-    }
-
-    let phoneList = JSON.parse(localStorage.getItem("phoneList") || "[]");
-
-    function updateList() {
-      const ul = document.getElementById("phoneList");
-      ul.innerHTML = "";
-      for (const phone of phoneList) {
-        const li = document.createElement("li");
-        li.innerHTML = `<a href="${build_url(phone)}" target="_blank">${phone}</a>`;
-        const delBtn = document.createElement("button");
-        delBtn.innerText = "Delete";
-        delBtn.addEventListener("click", function() {
-          phoneList = phoneList.filter(p => p !== phone);
-          localStorage.setItem("phoneList", JSON.stringify(phoneList));
-          updateList();
-        });
-        li.appendChild(delBtn);
-        ul.appendChild(li);
-      }
-
-      if (phoneList.length > 0) {
-         clearBtn.classList.remove("hidden");
-      } else {
-         clearBtn.classList.add("hidden");
-      }
-    }
-
-    function followAndStoreLink(phone) {
-      if (!phoneList.includes(phone)) {
-        phoneList.push(phone);
-        localStorage.setItem("phoneList", JSON.stringify(phoneList));
-        updateList();
-      }
-      window.open(build_url(phone));
-    }
-
-    const linkElem = document.getElementById("goLink");
-    linkElem.addEventListener("click", function(e) {
-          e.preventDefault();
-          followAndStoreLink(phone);
-          window.location.href = whatsappURL;
-    });
+let countryCode = 'US'; // Default to US
 
 
-    const inputElem = document.getElementById("phoneInput");
-    inputElem.addEventListener("input", function(e) {
-      const phone = e.target.value;
-      const parsed = libphonenumber.parsePhoneNumberFromString(phone, countryCode);
-      if (parsed && parsed.isValid()) {
-        inputElem.classList.remove("invalid");
-        inputElem.classList.add("valid");
-        const phone = parsed.number;
-        const whatsappURL = build_url(phone);
-        linkElem.href = whatsappURL;
-        linkElem.setAttribute('data-phone', phone)
-        linkElem.classList.remove("hidden");
-      } else {
-        inputElem.classList.remove("valid");
-        inputElem.classList.add("invalid");
-        linkElem.classList.add("hidden");
-        linkElem.setAttribute('data-phone', null)
-      }
-    });
+fetch('https://ipapi.co/country/')
+.then(response => response.text())
+.then(data => {
+  countryCode = data;
+})
+.catch(error => {
+  console.error('Error fetching country code:', error);
+});
 
-    inputElem.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        phone = linkElem.getAttribute("data-phone")
-        if (phone) {
-          followAndStoreLink(phone);
-        }
-      }
-    });
+function build_url(phone) {
+  return `whatsapp://send?phone=${phone}`
+}
 
-    clearBtn.addEventListener("click", function() {
-      phoneList = [];
+let phoneList = JSON.parse(localStorage.getItem("phoneList") || "[]");
+
+function updateList() {
+  const ul = document.getElementById("phoneList");
+  ul.innerHTML = "";
+  for (const phone of phoneList) {
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="${build_url(phone)}" target="_blank">${phone}</a>`;
+    const delBtn = document.createElement("button");
+    delBtn.innerText = "Delete";
+    delBtn.addEventListener("click", function() {
+      phoneList = phoneList.filter(p => p !== phone);
       localStorage.setItem("phoneList", JSON.stringify(phoneList));
       updateList();
     });
+    li.appendChild(delBtn);
+    ul.appendChild(li);
+  }
 
+  if (phoneList.length > 0) {
+     clearBtn.classList.remove("hidden");
+  } else {
+     clearBtn.classList.add("hidden");
+  }
+}
+
+function followAndStoreLink(phone) {
+  if (!phoneList.includes(phone)) {
+    phoneList.push(phone);
+    localStorage.setItem("phoneList", JSON.stringify(phoneList));
     updateList();
-  </script>
-</body>
+  }
+  window.open(build_url(phone));
+}
+
+const linkElem = document.getElementById("goLink");
+linkElem.addEventListener("click", function(e) {
+      e.preventDefault();
+      followAndStoreLink(phone);
+      window.location.href = whatsappURL;
+});
+
+
+const inputElem = document.getElementById("phoneInput");
+inputElem.addEventListener("input", function(e) {
+  const phone = e.target.value;
+  const parsed = libphonenumber.parsePhoneNumberFromString(phone, countryCode);
+  if (parsed && parsed.isValid()) {
+    inputElem.classList.remove("invalid");
+    inputElem.classList.add("valid");
+    const phone = parsed.number;
+    const whatsappURL = build_url(phone);
+    linkElem.href = whatsappURL;
+    linkElem.setAttribute('data-phone', phone)
+    linkElem.classList.remove("hidden");
+  } else {
+    inputElem.classList.remove("valid");
+    inputElem.classList.add("invalid");
+    linkElem.classList.add("hidden");
+    linkElem.setAttribute('data-phone', null)
+  }
+});
+
+inputElem.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    phone = linkElem.getAttribute("data-phone")
+    if (phone) {
+      followAndStoreLink(phone);
+    }
+  }
+});
+
+clearBtn.addEventListener("click", function() {
+  phoneList = [];
+  localStorage.setItem("phoneList", JSON.stringify(phoneList));
+  updateList();
+});
+
+updateList();
+</script>
 </html>
