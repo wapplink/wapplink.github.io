@@ -10,8 +10,10 @@
       margin: 0;
       padding: 0;
       display: flex;
+      font-family: Arial, sans-serif;
+      font-size: x-large;
       justify-content: center;
-      font-family: Arial, sans-serif; text-align: center; font-size: x-large
+      align-items: center;
     }
     .container {
       width: 100%;
@@ -64,6 +66,7 @@
 
     .visible { visibility: visible; }
     .hidden { visibility: hidden;}
+    .right { align-self: end}
 
   </style>
 </head>
@@ -75,7 +78,7 @@
     <a id="goLink" href="#" class="hidden" >Open</a>
 
     <ul id="phoneList" ></ul>
-    <button id="clearBtnList" class="hidden">Delete all</button>
+    <button id="clearBtnList" class="hidden right">Delete all</button>
   </div>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/libphonenumber-js/1.9.16/libphonenumber-js.min.js"></script>
@@ -104,8 +107,11 @@ function updateList() {
   const ul = document.getElementById("phoneList");
   ul.innerHTML = "";
   for (const phone of phoneList) {
+    const phoneNumber = libphonenumber.parsePhoneNumberFromString(phone)
+    const formatted = phoneNumber.formatInternational()
+
     const li = document.createElement("li");
-    li.innerHTML = `<a href="${build_url(phone)}" target="_blank">${phone}</a>`;
+    li.innerHTML = `<a href="${build_url(phone)}" target="_blank">${formatted}</a>`;
     const delBtn = document.createElement("button");
     delBtn.innerText = "Delete";
     delBtn.addEventListener("click", function() {
