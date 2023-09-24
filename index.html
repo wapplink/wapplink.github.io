@@ -164,7 +164,7 @@ function followAndStoreLink(phone) {
     updateList();
   }
   window.open(build_url(phone, "x"));
-  fathom.trackGoal('WWAC2LFM', 0);
+  window.fathom.trackGoal('WWAC2LFM', 0);
 }
 
 const linkElem = document.getElementById("goLink");
