@@ -164,13 +164,13 @@ function followAndStoreLink(phone) {
     updateList();
   }
   window.open(build_url(phone, "x"));
+  fathom.trackGoal('WWAC2LFM', 0);
 }
 
 const linkElem = document.getElementById("goLink");
 linkElem.addEventListener("click", function(e) {
       e.preventDefault();
       followAndStoreLink(phone);
-      window.location.href = whatsappURL;
 });
 
 
