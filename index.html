@@ -23,7 +23,7 @@
     }
 
     button { background-color: red; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; }
-    h2 { margin-top: 20px; display: inline-block; }
+    h2 { margin-top: 20px; }
     a {
       text-decoration: none;
       vertical-align: middle;
@@ -61,9 +61,11 @@
     }
 
     #phoneList li button {
-      background-color: red; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; margin-left: 10px;
+      color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; margin-left: 10px;
     }
 
+    .deleteBtn { background-color: red; }
+    .copyBtn { background-color: green; }
     .visible { visibility: visible; }
     .hidden { visibility: hidden;}
     .right { align-self: end}
@@ -73,7 +75,6 @@
 <body>
   <div class="container">
     <h2>Whatsapp link generator</h2>
-    <br/>
     <input id="phoneInput" type="tel" required autofocus size="15" placeholder="Phone number">
     <a id="goLink" href="#" class="hidden" >Open</a>
 
@@ -122,9 +123,24 @@ function updateList() {
     const formatted = phoneNumber.formatInternational()
 
     const li = document.createElement("li");
-    li.innerHTML = `<a href="${build_url(phone)}" target="_blank">${formatted}</a>`;
+    const phone_url = build_url(phone);
+    li.innerHTML = `<a href="${phone_url}" target="_blank">${formatted}</a>`;
+    const copyBtn = document.createElement("button");
+    copyBtn.classList.add("copyBtn");
+    copyBtn.innerText = "Copy";
+    copyBtn.addEventListener("click", async function() {
+      try {
+        await navigator.clipboard.writeText(phone_url);
+        console.log('Content copied to clipboard');
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+      }
+    });
+    li.appendChild(copyBtn);
     const delBtn = document.createElement("button");
+    delBtn.classList.add("deleteBtn");
     delBtn.innerText = "Delete";
+
     delBtn.addEventListener("click", function() {
       phoneList = phoneList.filter(p => p !== phone);
       localStorage.setItem("phoneList", JSON.stringify(phoneList));
