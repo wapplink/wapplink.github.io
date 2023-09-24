@@ -34,12 +34,12 @@
       color: white;
       border-radius: 5px;
     }
-    #phoneInput { border: 1px solid grey; border-radius: 5px; padding: 10px; font-size: 18px; }
+    #phoneInput { border: 3px solid grey; border-radius: 5px; padding: 10px; font-size: 18px; }
     #phoneInput.invalid { border: 3px solid red; }
     #phoneInput.valid { border: 3px solid green; }
     #phoneInput:focus {
       outline: none;
-      border: 1px solid grey;
+      border: 3px solid grey;
     }
 
     #phoneInput.invalid:focus {
@@ -74,7 +74,7 @@
   <div class="container">
     <h2>Whatsapp link generator</h2>
     <br/>
-    <input id="phoneInput" type="tel" required autofocus >
+    <input id="phoneInput" type="tel" required autofocus size="15" placeholder="Phone number">
     <a id="goLink" href="#" class="hidden" >Open</a>
 
     <ul id="phoneList" ></ul>
@@ -147,7 +147,7 @@ function followAndStoreLink(phone) {
     localStorage.setItem("phoneList", JSON.stringify(phoneList));
     updateList();
   }
-  window.open(build_url(phone));
+  window.open(build_url(phone, "x"));
 }
 
 const linkElem = document.getElementById("goLink");
