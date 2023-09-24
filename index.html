@@ -111,6 +111,7 @@ if (countryCode == undefined) {
 if (countryCode == undefined) {
   countryCode = "US"
 }
+
 function build_url(phone) {
   return `whatsapp://send?phone=${phone}`
 }
@@ -120,6 +121,9 @@ function updateList() {
   ul.innerHTML = "";
   for (const phone of phoneList) {
     const phoneNumber = libphonenumber.parsePhoneNumberFromString(phone)
+    if (phoneNumber == undefined) {
+      continue;
+    }
     const formatted = phoneNumber.formatInternational()
 
     const li = document.createElement("li");
@@ -169,14 +173,15 @@ function followAndStoreLink(phone) {
 
 const linkElem = document.getElementById("goLink");
 linkElem.addEventListener("click", function(e) {
-      e.preventDefault();
-      followAndStoreLink(phone);
+  e.preventDefault();
+  phone = linkElem.getAttribute("data-phone")
+  followAndStoreLink(phone);
 });
 
 
 const inputElem = document.getElementById("phoneInput");
 inputElem.addEventListener("input", function(e) {
-  const phone = e.target.value;
+  let phone = e.target.value;
   if (phone == "") {
     inputElem.classList.remove("invalid");
     inputElem.classList.remove("valid");
@@ -184,10 +189,10 @@ inputElem.addEventListener("input", function(e) {
   }
   const parsed = libphonenumber.parsePhoneNumberFromString(phone, countryCode);
   if (parsed && parsed.isValid()) {
+    phone = parsed.number;
+    const whatsappURL = build_url(phone);
     inputElem.classList.remove("invalid");
     inputElem.classList.add("valid");
-    const phone = parsed.number;
-    const whatsappURL = build_url(phone);
     linkElem.href = whatsappURL;
     linkElem.setAttribute('data-phone', phone)
     linkElem.classList.remove("hidden");
@@ -202,7 +207,7 @@ inputElem.addEventListener("input", function(e) {
 inputElem.addEventListener("keydown", function(e) {
   if (e.key === "Enter") {
     phone = linkElem.getAttribute("data-phone")
-    if (phone) {
+    if (phone && phone != "null") {
       followAndStoreLink(phone);
     }
   }
