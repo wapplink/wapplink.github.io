@@ -68,7 +68,7 @@
     .copyBtn { background-color: green; }
     .visible { visibility: visible; }
     .hidden { visibility: hidden;}
-    .right { align-self: end}
+    .right { text-align: right}
 
   </style>
 </head>
@@ -131,7 +131,7 @@ function updateList() {
     copyBtn.addEventListener("click", async function() {
       try {
         await navigator.clipboard.writeText(phone_url);
-        console.log('Content copied to clipboard');
+        window.fathom.trackGoal('YR2YAH2L', 0);
       } catch (err) {
         console.error('Failed to copy: ', err);
       }
