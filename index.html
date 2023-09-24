@@ -177,6 +177,11 @@ linkElem.addEventListener("click", function(e) {
 const inputElem = document.getElementById("phoneInput");
 inputElem.addEventListener("input", function(e) {
   const phone = e.target.value;
+  if (phone == "") {
+    inputElem.classList.remove("invalid");
+    inputElem.classList.remove("valid");
+    return
+  }
   const parsed = libphonenumber.parsePhoneNumberFromString(phone, countryCode);
   if (parsed && parsed.isValid()) {
     inputElem.classList.remove("invalid");
